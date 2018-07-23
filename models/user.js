@@ -1,5 +1,5 @@
-const mongoose   = require('mongoose'),
-	  timestamps = require('mongoose-timestamp')
+const mongoose = require('mongoose'),
+	timestamps = require('mongoose-timestamp')
 
 const UserSchema = new mongoose.Schema({
 	email: {
@@ -21,6 +21,12 @@ const UserSchema = new mongoose.Schema({
 			required: true,
 		},
 	},
+	address: [{
+		street: { type: String },
+		city: { type: String },
+		country: { type: String }
+	}]
+
 }, { collection: 'users' })
 
 UserSchema.plugin(timestamps)

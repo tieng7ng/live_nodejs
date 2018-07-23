@@ -9,11 +9,12 @@ module.exports = function (server) {
 	server.post('/users', (req, res, next) => {
 
 		let data = req.body || {}
-
+		console.log('>>> /users POST');
+		console.log(data),
 		User.create(data)
 			.then(user => {
-				res.send(200, user)
-				next()
+				res.send(200, user);
+				next();
 			})
 			.catch(err => {
 				res.send(500, err)
