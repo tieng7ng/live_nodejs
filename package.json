@@ -11,6 +11,7 @@
   "author": "Nick Parsons <nick.parsons@mongodb.com>",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^2.0.0",
     "mongoose": "^4.11.1",
     "mongoose-timestamp": "^0.6.0",
     "restify": "^4.3.1"

@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 const User = require('../models/user'),
 	Todo = require('../models/todo')
 
@@ -8,18 +10,35 @@ module.exports = function (server) {
 	 */
 	server.post('/users', (req, res, next) => {
 
-		let data = req.body || {}
-		console.log('>>> /users POST');
-		console.log(data),
-		User.create(data)
-			.then(user => {
-				res.send(200, user);
-				next();
-			})
-			.catch(err => {
-				res.send(500, err)
-			})
+		let data = JSON.parse(req.body || {});
 
+		console.log('>>> /users POST');
+		console.log(data);
+
+		console.log(data.password);
+
+		bcrypt.hash(data.password, 10, function (err, hash) {
+			console.log('hash');
+			if (err) {
+				console.log('error', err, hash);
+				return res.status(500).json({
+					error: err
+				});
+			}
+			else {
+				data.password = hash;
+
+				User.create(data)
+					.then(user => {
+						res.send(200, user);
+						next();
+					})
+					.catch(err => {
+						res.send(500, err)
+					})
+
+			}
+		});
 	})
 
 	/**
@@ -34,9 +53,18 @@ module.exports = function (server) {
 		// remove skip and limit from query to avoid false querying
 		delete query.skip
 		delete query.limit
-
 		User.find(query).skip(skip).limit(limit)
 			.then(users => {
+
+				//=====
+				// vider le champ password
+				for (let index = 0; index < users.length; ++index) {
+					//users[index].password = 'xxx';
+					delete users[index].password;
+				}
+				// vider le champ password
+				//=====
+
 				res.send(200, users)
 				next()
 			})
@@ -58,6 +86,7 @@ module.exports = function (server) {
 					res.send(404)
 					next()
 				}
+				user.password = 'xxx';
 
 				res.send(200, user)
 				next()
@@ -66,7 +95,6 @@ module.exports = function (server) {
 			.catch(err => {
 				res.send(500, err)
 			})
-
 	})
 
 	/**
@@ -79,22 +107,78 @@ module.exports = function (server) {
 				new: true
 			}
 
-		User.findByIdAndUpdate({ _id: req.params.userId }, data, opts)
-			.then(user => { // function MAP
+		console.log('>>> /users PUT');
+		console.log(data);
 
-				if (!user) {
-					res.send(404)
-					next()
+		if (typeof req.body.password !== 'undefined') {
+			//=====
+			// Gestion du password
+
+			console.log('hash');
+			bcrypt.hash(req.body.password, 10, function (err, hash) {
+				if (err) {
+					console.log('error');
+					return res.status(500).json({
+						error: err
+					});
 				}
+				else {
+					console.log('hash ' + hash);
+					data.password = hash;
+				}
+				console.log(data);
+				User.findByIdAndUpdate({ _id: req.params.userId }, { $set: JSON.parse(data) }, opts)
+					.then(user => { // function MAP
 
-				res.send(200, user)
-				next()
-
+						if (!user) {
+							res.send(404)
+							next()
+						}
+						//=====
+						// Affichage user
+						user.password = 'xxx';
+						res.send(200, user);
+						// Affichage user
+						//=====
+						next()
+					})
+					.catch(err => {
+						res.send(500, err)
+					})
 			})
-			.catch(err => {
-				res.send(500, err)
-			})
+			// Gestion du password
+			//=====
 
+		} else {
+			//=====
+			// Sans password
+			console.log('>> put without password', data);
+			console.log({"email":"toto@dbX.comd2"});
+			User.findByIdAndUpdate({ _id: req.params.userId }, { $set: JSON.parse(data) }, { new: true })
+				.then(user => { // function MAP
+
+					console.log({ $set: data }, user);
+
+					if (!user) {
+						res.send(404)
+						next()
+					}
+					//=====
+					// Affichage user
+					user.password = 'xxx';
+					res.send(200, user)
+					next()
+					// Affichage user
+					//=====
+				})
+				.catch(err => {
+					console.log(err);
+					res.send(500, err)
+				})
+			// Sans password
+			//=====
+
+		}
 	})
 
 	/**

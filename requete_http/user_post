@@ -1,0 +1,15 @@
+
+http://localhost:3000/users
+
+{
+"email":"nick11.parsons@mongodb.com",
+"password":"kaka",
+"address":	
+[{
+"street":"title11"
+}],
+"name":{
+"last":"Parsons1X",
+"first":"Nick1"
+}
+}
