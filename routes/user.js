@@ -101,6 +101,7 @@ module.exports = function (server) {
 	 * Update
 	 */
 	server.put('/users/:userId', (req, res, next) => {
+		let tabReq = JSON.parse(req.body);
 
 		let data = req.body || {},
 			opts = {
@@ -110,12 +111,12 @@ module.exports = function (server) {
 		console.log('>>> /users PUT');
 		console.log(data);
 
-		if (typeof req.body.password !== 'undefined') {
+		if (typeof tabReq.password !== 'undefined') {
 			//=====
 			// Gestion du password
 
 			console.log('hash');
-			bcrypt.hash(req.body.password, 10, function (err, hash) {
+			bcrypt.hash(tabReq.password, 10, function (err, hash) {
 				if (err) {
 					console.log('error');
 					return res.status(500).json({
@@ -123,10 +124,15 @@ module.exports = function (server) {
 					});
 				}
 				else {
-					console.log('hash ' + hash);
-					data.password = hash;
+					//=====
+					// Chiffrage du password
+					tabData = JSON.parse(data);
+					tabData.password = hash;
+					data = JSON.stringify(tabData);
+					// Chiffrage du password
+					//=====
+
 				}
-				console.log(data);
 				User.findByIdAndUpdate({ _id: req.params.userId }, { $set: JSON.parse(data) }, opts)
 					.then(user => { // function MAP
 
@@ -153,8 +159,23 @@ module.exports = function (server) {
 			//=====
 			// Sans password
 			console.log('>> put without password', data);
-			console.log({"email":"toto@dbX.comd2"});
-			User.findByIdAndUpdate({ _id: req.params.userId }, { $set: JSON.parse(data) }, { new: true })
+			if (!Object.keys(data).length > 0) {
+				console.log('objet');
+			} else {
+				console.log('pas objet');
+			}
+
+			//=====
+			// Appel depuis ANGULAR : traitement data
+			try {
+				JSON.parse(data);
+			} catch (e) {
+				data = JSON.stringify(data);
+			}
+			// Appel depuis ANGULAR : traitement data
+			//=====
+
+			User.findByIdAndUpdatpassworde({ _id: req.params.userId }, { $set: JSON.parse(data) }, { new: true })
 				.then(user => { // function MAP
 
 					console.log({ $set: data }, user);
@@ -163,6 +184,8 @@ module.exports = function (server) {
 						res.send(404)
 						next()
 					}
+					console.log('put OK');
+
 					//=====
 					// Affichage user
 					user.password = 'xxx';
@@ -173,11 +196,11 @@ module.exports = function (server) {
 				})
 				.catch(err => {
 					console.log(err);
-					res.send(500, err)
+					res.send(500, err + ' ---- ' + data)
 				})
 			// Sans password
 			//=====
-
+			password
 		}
 	})
 

@@ -7,5 +7,8 @@ module.exports = {
     port: process.env.PORT || 3000,
     db: {
         uri: 'mongodb://adminRestau:azerty@172.17.0.2/restau',
-    }
+    },
+    tokenSecret:'raieiffelfootcuisine'
+
+
 }

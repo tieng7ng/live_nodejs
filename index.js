@@ -2,7 +2,7 @@
  * Module Dependencies
  */
 const restify = require('restify'),
-	  mongoose = require('mongoose')
+	mongoose = require('mongoose')
 
 /**
  * Config
@@ -13,9 +13,14 @@ const config = require('./config')
  * Initialize Server
  */
 const server = restify.createServer({
-    name    : config.name,
-    version : config.version
+	name: config.name,
+	version: config.version
 })
+
+// Autorise XHR cross domain
+const cors = require('cors');
+// Active XHR cross domain
+server.use(cors());
 
 /**
  * Bundled Plugins (http://restify.com/#bundled-plugins)
@@ -34,15 +39,15 @@ server.listen(config.port, () => {
 	 * Connect to MongoDB via Mongoose
 	 */
 	const opts = {
-	    promiseLibrary: global.Promise,
-	    server: {
-	        auto_reconnect: true,
-	        reconnectTries: Number.MAX_VALUE,
-	        reconnectInterval: 1000,
-	    },
-	    config: {
-	        autoIndex: true,
-	    },
+		promiseLibrary: global.Promise,
+		server: {
+			auto_reconnect: true,
+			reconnectTries: Number.MAX_VALUE,
+			reconnectInterval: 1000,
+		},
+		config: {
+			autoIndex: true,
+		},
 	}
 
 	mongoose.Promise = opts.promiseLibrary
@@ -51,16 +56,17 @@ server.listen(config.port, () => {
 	const db = mongoose.connection
 
 	db.on('error', (err) => {
-	    if (err.message.code === 'ETIMEDOUT') {
-	        console.log(err)
-	        mongoose.connect(config.db.uri, opts)
-	    }
+		if (err.message.code === 'ETIMEDOUT') {
+			console.log(err)
+			mongoose.connect(config.db.uri, opts)
+		}
 	})
 
 	db.once('open', () => {
 
-		require('./routes/user')(server)
-		require('./routes/todo')(server)
+		require('./routes/user')(server);
+		require('./routes/sign')(server);
+		require('./routes/todo')(server);
 
 		console.log(`Server is listening on port ${config.port}`)
 

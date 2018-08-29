@@ -12,8 +12,12 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^2.0.0",
+    "cors": "^2.8.4",
     "mongoose": "^4.11.1",
     "mongoose-timestamp": "^0.6.0",
     "restify": "^4.3.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.4"
   }
 }
