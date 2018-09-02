@@ -36,7 +36,7 @@ Token.prototype.create = function (email, id) {
  * @param {string} token 
  */
 Token.prototype.valid = function (token) {
-  console.log('token valid ' + this.tokenSecret)
+  console.log('token valid >>' + this.tokenSecret)
   const tabReturn = [];
   jwt.verify(token, this.tokenSecret, function (err, decoded) {
     if (err) {

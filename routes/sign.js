@@ -38,8 +38,8 @@ module.exports = function (server) {
               token = new Token(config.tokenSecret);
               return res.send(200, {
                 success: 'Welcome to the JWT Auth',
-                firstname: user.firstname,
-                lastname: user.lastname,
+                firstname: user.name.first,
+                lastname: user.name.last,
                 token: token.create(req.body.email, user._id)
               });
               // Genere token

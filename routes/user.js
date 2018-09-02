@@ -1,5 +1,9 @@
 const bcrypt = require('bcrypt');
 
+const config = require('../config');
+const Token = require('../services/token');
+const token = new Token(config.tokenSecret);
+
 const User = require('../models/user'),
 	Todo = require('../models/todo')
 
@@ -45,14 +49,30 @@ module.exports = function (server) {
 	 * List
 	 */
 	server.get('/users', (req, res, next) => {
+		console.log('>>>');
+
+		//=====
+		// Validation TOKEN
+		const sToken = req.query.token || req.body.token;
+		const tabTokenValid = token.valid(sToken);
+
+		if (!tabTokenValid['return']) {
+			console.log('token KO');
+			return res.send(500, { auth: false, message: 'Failed to authenticate token.' });
+		} else {
+			console.log('token OK');
+		}
+		// Validation TOKEN
+		//=====
 
 		let limit = parseInt(req.query.limit, 10) || 10, // default limit to 10 docs
 			skip = parseInt(req.query.skip, 10) || 0, // default skip to 0 docs
 			query = req.query || {}
 
 		// remove skip and limit from query to avoid false querying
-		delete query.skip
-		delete query.limit
+		delete query.skip;
+		delete query.limit;
+		delete query.token;
 		User.find(query).skip(skip).limit(limit)
 			.then(users => {
 
